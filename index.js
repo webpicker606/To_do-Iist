@@ -4,7 +4,7 @@ var task_container = document.querySelector(".task_container");
 var input = document.querySelector("input");
 var add_btn = document.querySelector(".add_btn");
 var del_btn = document.querySelector(".del_btn");
-
+var completed_list = document.querySelector(".completed");
 //function to check the task is a unique task
 function Isvalid(val) {
   if (localStorage.length == 0) {
@@ -26,38 +26,44 @@ function Isvalid(val) {
 function create_task_input() {
   if (input.value != "") {
     if (Isvalid(input.value) === true) {
-      var p = document.createElement("p");
-      var date = document.createElement("p");
-      var a = document.createElement("a");
       var div = document.createElement("div");
-      var i = document.createElement("i");
+      var del_btn = document.createElement("a");
+      var complted_btn = document.createElement("a");
+      var obj = {};
+
       var today = new Date();
-      date.innerHTML =
+      var date =
         today.getDate() + "/" + today.getMonth() + "/" + today.getFullYear();
 
+      obj.date = date;
+      obj.status = "incomplete";
       div.classList.add("task");
-      i.classList.add("far");
-      i.classList.add("fa-trash-alt");
-      date.classList.add("date");
 
-      p.innerHTML = input.value;
-      localStorage.setItem(`${input.value}`, `${date.innerHTML}`);
+      localStorage.setItem(`${input.value}`, `${JSON.stringify(obj)}`);
       task_storage.push(`${input.value}`);
-      console.log(task_storage);
 
-      a.appendChild(i);
-      div.appendChild(p);
-      div.appendChild(date);
-      div.appendChild(a);
+      div.innerHTML = `
+      <p>${input.value}</p>
+      <p class="date">${obj.date}</p>
+      <a ><i class="fas fa-check-square"></i></a>
+      <a><i class="fas fa-trash"></i></a>`;
       task_list.appendChild(div);
       input.value = "";
 
-      var buttons = document.querySelectorAll("a");
-      buttons.forEach(function (button) {
-        button.addEventListener("click", delete_task);
+      var del_buttons = document.querySelectorAll(".fa-trash");
+      del_buttons.forEach(function (button) {
+        button.addEventListener("click", remove_task_incomplete);
+      });
+      var completed_buttons = document.querySelectorAll(".fa-check-square");
+      completed_buttons.forEach(function (button) {
+        button.addEventListener("click", function (e) {
+          e.path[2].classList.add("complete");
+          e.path[1].classList.add("display_none");
+          console.log(e);
+        });
       });
     } else {
-      alert(`You already have a task called ${input.value}`);
+      alert(`You already have a task called "${input.value}"`);
     }
   } else {
     alert("Tasks cannot be empty");
@@ -78,12 +84,15 @@ function arrayRemove(arr, value) {
 }
 
 //function to delete a dom and remove data from local storage
-function delete_task(e) {
-  task_list.removeChild(e.path[2]);
+function remove_task_incomplete(e) {
+  console.log(e.path);
+  e.path[1].removeEventListener("click", remove_task_incomplete);
+
   task_storage = arrayRemove(
     task_storage,
     `${e.path[2].children[0].innerHTML}`
   );
+  task_list.removeChild(e.path[2]);
   console.log(task_storage);
   localStorage.removeItem(`${e.path[2].children[0].innerHTML}`);
   if (localStorage.length < 1) {
@@ -98,34 +107,49 @@ function load_task() {
   var task = [];
   for (let index = 0; index < localStorage.length; index++) {
     var key = localStorage.key(index);
-    var value = localStorage.getItem(key);
-    var p = document.createElement("p");
-    var date = document.createElement("p");
-    var a = document.createElement("a");
+    var value_str = localStorage.getItem(key);
+    var obj = JSON.parse(value_str);
     var div = document.createElement("div");
-    var i = document.createElement("i");
 
     //to find duplicate tasks
     task.push(key);
 
     div.classList.add("task");
-    i.classList.add("far");
-    i.classList.add("fa-trash-alt");
-    date.classList.add("date");
 
-    date.innerHTML = value;
-    p.innerHTML = key;
     //process of creating the task div
-    //i know a easier way but i did this
-    a.appendChild(i);
-    div.appendChild(p);
-    div.appendChild(date);
-    div.appendChild(a);
+    var disp = "";
+    if (obj.status == "completed") {
+      div.classList.add("complete");
+      disp = "display_none";
+    }
+
+    div.innerHTML = `
+      <p>${key}</p>
+      <p class="date">${obj.date}</p>
+      <a class="${disp}" ><i class="fas fa-check-square "></i></a>
+      <a><i class="fas fa-trash"></i></a>`;
     task_list.appendChild(div);
 
-    var buttons = document.querySelectorAll("a");
-    buttons.forEach(function (button) {
-      button.addEventListener("click", delete_task);
+    var del_buttons = document.querySelectorAll(".fa-trash");
+    del_buttons.forEach(function (button) {
+      button.addEventListener("click", remove_task_incomplete);
+    });
+    var completed_buttons = document.querySelectorAll(".fa-check-square");
+    completed_buttons.forEach(function (button) {
+      button.addEventListener("click", function (e) {
+        e.path[2].classList.add("complete");
+        e.path[1].classList.add("display_none");
+        var item = localStorage.getItem(
+          `${e.path[2].firstElementChild.innerHTML}`
+        );
+        var obj = JSON.parse(item);
+        obj.status = "completed";
+        var obj_str = JSON.stringify(obj);
+        localStorage.setItem(
+          `${e.path[2].firstElementChild.innerHTML}`,
+          obj_str
+        );
+      });
     });
   }
   if (localStorage.length < 1) {

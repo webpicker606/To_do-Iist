@@ -48,14 +48,16 @@ input {
   padding: 0.5em;
   border: 2.5px solid #333;
 }
-
+.add_btn {
+  color: whitesmoke;
+}
 button {
   font-size: 1.25em;
   padding: 0.5em 0.75em;
   cursor: pointer;
   margin-top: 1em;
   background-color: #333;
-  color: whitesmoke;
+  color: #333;
   border: 2.5px solid #333;
   transition: transform 0.5s;
 }
@@ -105,6 +107,7 @@ h2 {
   width: 100vw;
   height: auto;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   margin-bottom: 2em;
@@ -115,6 +118,7 @@ h2 {
 .task_list {
   width: 80vw;
   height: auto;
+  margin-bottom: 2em;
   border: 5px solid #333;
   border-radius: 5px;
 }
@@ -124,10 +128,15 @@ a {
   padding: 0.6em;
   color: whitesmoke;
 }
+p {
+  max-width: 100%;
+}
 a {
+  color: #333;
   background-color: red;
   margin-left: 0;
   cursor: pointer;
+  border: 1px solid black;
 }
 .task {
   border: 1px solid whitesmoke;
@@ -144,4 +153,8 @@ a {
 .date {
   margin-right: 0.75em;
   margin-left: auto;
+}
+.complete {
+  text-decoration: line-through;
+  color: whitesmoke;
 }
